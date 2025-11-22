@@ -14,11 +14,44 @@ import connectDB from './src/config/db.js';
 // --- INITIALIZE APP ---
 const app = express();
 
+
+
+
+
 // --- MIDDLEWARE ---
-// Use CORS to allow frontend requests
-app.use(cors()); 
+
+
+// 🔑 CORS Configuration (CRUCIAL FOR PRODUCTION)
+const allowedOrigins = [
+  'http://localhost:5173', // Your React dev server
+];
+
+// Add the Vercel URL only if it's available in the environment
+if (process.env.CLIENT_URL) {
+  allowedOrigins.push(process.env.CLIENT_URL);
+}
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true); 
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      // 401 Unauthorized for unlisted origins
+      callback(new Error('Not allowed by CORS'), false); 
+    }
+  },
+  credentials: true, // Allow cookies/authorization headers
+};
+
+app.use(cors(corsOptions));
+
 // Body parser to accept JSON data
 app.use(express.json());
+
+
 
 // --- ROUTES ---
 // Simple root route to test if the server is running
@@ -30,10 +63,18 @@ app.get('/', (req, res) => {
 app.use('/api/users', userRoutes);
 app.use('/api/courses', courseRoutes);
 
+
+
+
+
 // --- ERROR MIDDLEWARE ---
 // Must be placed AFTER routes
 app.use(notFound);
 app.use(errorHandler);
+
+
+
+
 
 // --- SERVER LISTEN ---
 const PORT = process.env.PORT || 5000;
