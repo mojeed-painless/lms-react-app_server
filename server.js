@@ -46,7 +46,10 @@ const corsOptions = {
   credentials: true, // Allow cookies/authorization headers
 };
 
-app.use(cors(corsOptions));
+app.use(cors({
+    origin: 'http://localhost:5173', // <--- Make sure this port matches your frontend
+    credentials: true,
+}));
 
 // Body parser to accept JSON data
 app.use(express.json());
