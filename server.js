@@ -23,7 +23,8 @@ const app = express();
 
 // 🔑 CORS Configuration (CRUCIAL FOR PRODUCTION)
 const allowedOrigins = [
-  'http://localhost:5173', // Your React dev server
+  'http://localhost:5173', 
+  'https://lms-react-app-client.vercel.app'
 ];
 
 // Add the Vercel URL only if it's available in the environment
@@ -33,23 +34,22 @@ if (process.env.CLIENT_URL) {
 
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true); 
-    
-    if (allowedOrigins.includes(origin)) {
+    // Allows requests from listed origins or no origin (e.g., Postman)
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      // 401 Unauthorized for unlisted origins
       callback(new Error('Not allowed by CORS'), false); 
     }
   },
-  credentials: true, // Allow cookies/authorization headers
+  credentials: true,
 };
 
-app.use(cors({
-    origin: 'http://localhost:5173', // <--- Make sure this port matches your frontend
-    credentials: true,
-}));
+app.use(cors(corsOptions));
+
+// app.use(cors({
+//     origin: 'http://localhost:5000', // <--- Make sure this port matches your frontend
+//     credentials: true,
+// }));
 
 // Body parser to accept JSON data
 app.use(express.json());
